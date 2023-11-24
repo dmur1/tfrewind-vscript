@@ -23,6 +23,28 @@ const VERSION = "0.0.1";
 const NUM_FRAMES_TO_CONSUME_ON_REWIND = 75;
 const NUM_FRAMES_TO_BUFFER = 425;
 
+function ShouldRewind() {
+    local buttons = NetProps.GetPropInt(self, "m_nButtons");
+    if (!(buttons & Constants.FButtons.IN_RELOAD)) {
+        r_isRewinding = 0;
+        return;
+    }
+
+    if (r_numValidFramesBuffered == 0) {
+        r_isRewinding = 0;
+        return;
+    }
+
+    if (r_isRewinding == 0) {
+        if (r_numValidFramesBuffered != NUM_FRAMES_TO_BUFFER) {
+            return;
+        }
+
+        r_isRewinding = 1
+        r_numValidFramesBuffered -= NUM_FRAMES_TO_CONSUME_ON_REWIND;
+    }
+}
+
 function Rewind() {
     local bufferIndex = r_bufferIndex - 1;
     if (bufferIndex < 0) {
@@ -38,6 +60,8 @@ function Rewind() {
     self.Teleport(true, newOrigin, true, newAngle, true, newVelocity);
 
     r_bufferIndex = bufferIndex;
+
+    r_numValidFramesBuffered -= 1;
 }
 
 function CaptureState() {
@@ -50,15 +74,18 @@ function CaptureState() {
     r_velocity[bufferIndex] = self.GetAbsVelocity();
 
     r_bufferIndex = (bufferIndex + 1) % NUM_FRAMES_TO_BUFFER;
+
+    if (r_numValidFramesBuffered < NUM_FRAMES_TO_BUFFER) {
+        r_numValidFramesBuffered += 1;
+    }
+
+    if (r_numValidFramesBuffered == NUM_FRAMES_TO_BUFFER) {
+        // ready to rewind!
+    }
 }
 
 function PlayerThink() {
-    r_isRewinding = 0;
-
-    local buttons = NetProps.GetPropInt(self, "m_nButtons");
-    if (buttons & Constants.FButtons.IN_RELOAD) {
-        r_isRewinding = 1
-    }
+    ShouldRewind();
 
     if (r_isRewinding == 1) {
         Rewind();
@@ -79,6 +106,8 @@ function OnGameEvent_player_spawn(params) {
     player.ValidateScriptScope();
 
     player.GetScriptScope().r_isRewinding <- 0
+
+    player.GetScriptScope().r_numValidFramesBuffered <- 0
 
     player.GetScriptScope().r_bufferIndex <- 0;
 
