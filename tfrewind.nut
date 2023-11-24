@@ -65,6 +65,8 @@ function PlayerThink() {
     } else {
         CaptureState();
     }
+
+    return -1;
 }
 
 function OnGameEvent_player_spawn(params) {
