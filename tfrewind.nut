@@ -23,6 +23,10 @@ const VERSION = "0.0.1";
 const NUM_FRAMES_TO_CONSUME_ON_REWIND = 75;
 const NUM_FRAMES_TO_BUFFER = 425;
 
+const REWIND_POSITION = true;
+const REWIND_ANGLE = false;
+const REWIND_VELOCITY = true;
+
 function ShouldRewind() {
     local buttons = NetProps.GetPropInt(self, "m_nButtons");
     if (!(buttons & Constants.FButtons.IN_RELOAD)) {
@@ -57,7 +61,10 @@ function Rewind() {
 
     local newVelocity = r_velocity[bufferIndex];
 
-    self.Teleport(true, newOrigin, true, newAngle, true, newVelocity);
+    self.Teleport(
+        REWIND_POSITION, newOrigin,
+        REWIND_ANGLE, newAngle,
+        REWIND_VELOCITY, newVelocity);
 
     r_bufferIndex = bufferIndex;
 
