@@ -24,35 +24,43 @@ const NUM_FRAMES_TO_CONSUME_ON_REWIND = 75;
 const NUM_FRAMES_TO_BUFFER = 425;
 
 function Rewind() {
-    local bufferIndex = rewindBufferIndex - 1;
+    local bufferIndex = r_bufferIndex - 1;
     if (bufferIndex < 0) {
         bufferIndex += NUM_FRAMES_TO_BUFFER;
     }
 
-    local newOrigin = rewindPositions[bufferIndex];
+    local newOrigin = r_position[bufferIndex];
 
-    self.Teleport(true, newOrigin, false, QAngle(0, 0, 0), false, Vector(0, 0, 0));
+    local newAngle = r_angle[bufferIndex];
 
-    rewindBufferIndex = bufferIndex;
+    local newVelocity = r_velocity[bufferIndex];
+
+    self.Teleport(true, newOrigin, true, newAngle, true, newVelocity);
+
+    r_bufferIndex = bufferIndex;
 }
 
 function CaptureState() {
-    local bufferIndex = rewindBufferIndex;
+    local bufferIndex = r_bufferIndex;
 
-    rewindPositions[bufferIndex] = self.GetOrigin();
+    r_position[bufferIndex] = self.GetOrigin();
 
-    rewindBufferIndex = (bufferIndex + 1) % NUM_FRAMES_TO_BUFFER;
+    r_angle[bufferIndex] = self.GetAbsAngles();
+
+    r_velocity[bufferIndex] = self.GetAbsVelocity();
+
+    r_bufferIndex = (bufferIndex + 1) % NUM_FRAMES_TO_BUFFER;
 }
 
 function PlayerThink() {
-    rewindIsRewinding = 0;
+    r_isRewinding = 0;
 
     local buttons = NetProps.GetPropInt(self, "m_nButtons");
     if (buttons & Constants.FButtons.IN_RELOAD) {
-        rewindIsRewinding = 1
+        r_isRewinding = 1
     }
 
-    if (rewindIsRewinding == 1) {
+    if (r_isRewinding == 1) {
         Rewind();
     } else {
         CaptureState();
@@ -68,13 +76,23 @@ function OnGameEvent_player_spawn(params) {
 
     player.ValidateScriptScope();
 
-    player.GetScriptScope().rewindIsRewinding <- 0
+    player.GetScriptScope().r_isRewinding <- 0
 
-    player.GetScriptScope().rewindBufferIndex <- 0;
+    player.GetScriptScope().r_bufferIndex <- 0;
 
-    player.GetScriptScope().rewindPositions <- [];
+    player.GetScriptScope().r_position <- [];
     for (local i = 0; i < NUM_FRAMES_TO_BUFFER; i++) {
-        player.GetScriptScope().rewindPositions.append(Vector(0, 0, 0));
+        player.GetScriptScope().r_position.append(Vector(0, 0, 0));
+    }
+
+    player.GetScriptScope().r_angle <- [];
+    for (local i = 0; i < NUM_FRAMES_TO_BUFFER; i++) {
+        player.GetScriptScope().r_angle.append(QAngle(0, 0, 0));
+    }
+
+    player.GetScriptScope().r_velocity <- []
+    for (local i = 0; i < NUM_FRAMES_TO_BUFFER; i++) {
+        player.GetScriptScope().r_velocity.append(Vector(0, 0, 0));
     }
 
     AddThinkToEnt(player, "PlayerThink");
