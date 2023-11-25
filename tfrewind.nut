@@ -29,6 +29,17 @@ const REWIND_POSITION = true;
 const REWIND_ANGLE = false;
 const REWIND_VELOCITY = true;
 
+const SOUND_UI_READY_TO_REWIND_1 = "player/recharged.wav";
+const SOUND_UI_READY_TO_REWIND_2 = "ui/cyoa_map_open.wav";
+const SOUND_UI_START_REWIND = "ui/buttonclick.wav";
+const SOUND_WORLD_START_REWIND_1 = "weapons/bumper_car_decelerate.wav";
+const SOUND_WORLD_START_REWIND_2 = "weapons/loch_n_load_dud.wav";
+
+PrecacheScriptSound(SOUND_UI_READY_TO_REWIND_1);
+PrecacheScriptSound(SOUND_UI_READY_TO_REWIND_2);
+PrecacheScriptSound(SOUND_UI_START_REWIND);
+PrecacheScriptSound(SOUND_WORLD_START_REWIND_1);
+PrecacheScriptSound(SOUND_WORLD_START_REWIND_2);
 
 function PlaySound2D(sound) {
     EmitSoundEx({
@@ -52,6 +63,13 @@ function PlaySound3D(sound) {
         });
     }
 }
+
+function StartRewindFX() {
+    PlaySound2D(SOUND_UI_START_REWIND);
+    PlaySound3D(SOUND_WORLD_START_REWIND_1);
+    PlaySound3D(SOUND_WORLD_START_REWIND_2);
+}
+
 function ShouldRewind() {
     local buttons = NetProps.GetPropInt(self, "m_nButtons");
     if (!(buttons & Constants.FButtons.IN_RELOAD)) {
@@ -71,6 +89,8 @@ function ShouldRewind() {
 
         r_isRewinding = 1
         r_numValidFramesBuffered -= NUM_FRAMES_TO_CONSUME_ON_REWIND;
+
+        StartRewindFX();
     }
 }
 
@@ -99,17 +119,8 @@ function Rewind() {
 function ReadyToRewindFX() {
     ClientPrint(self, 3, "READY TO REWIND");
 
-    EmitSoundEx({
-        sound_name = "player/recharged.wav",
-        entity = self,
-        filter_type = Constants.EScriptRecipientFilter.RECIPIENT_FILTER_SINGLE_PLAYER
-    });
-
-    EmitSoundEx({
-        sound_name = "ui/cyoa_map_open.wav",
-        entity = self,
-        filter_type = Constants.EScriptRecipientFilter.RECIPIENT_FILTER_SINGLE_PLAYER
-    });
+    PlaySound2D(SOUND_UI_READY_TO_REWIND_1);
+    PlaySound2D(SOUND_UI_READY_TO_REWIND_2);
 }
 
 function CaptureState() {
