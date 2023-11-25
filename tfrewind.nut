@@ -20,6 +20,8 @@ const VERSION = "0.0.1";
 
 // based on https://github.com/dmur1/tfrewind/blob/main/tfrewind.sm
 
+::MaxPlayers <- MaxClients().tointeger();
+
 const NUM_FRAMES_TO_CONSUME_ON_REWIND = 75;
 const NUM_FRAMES_TO_BUFFER = 425;
 
@@ -27,6 +29,29 @@ const REWIND_POSITION = true;
 const REWIND_ANGLE = false;
 const REWIND_VELOCITY = true;
 
+
+function PlaySound2D(sound) {
+    EmitSoundEx({
+        sound_name = sound,
+        entity = self,
+        filter_type = Constants.EScriptRecipientFilter.RECIPIENT_FILTER_SINGLE_PLAYER
+    });
+}
+
+function PlaySound3D(sound) {
+    for (local i = 1; i <= MaxPlayers; i++) {
+       local player = PlayerInstanceFromIndex(i);
+       if (player == null)
+          continue;
+
+       EmitSoundEx({
+            sound_name = sound,
+            entity = self,
+            origin = player.GetOrigin(),
+            filter_type = Constants.EScriptRecipientFilter.RECIPIENT_FILTER_GLOBAL
+        });
+    }
+}
 function ShouldRewind() {
     local buttons = NetProps.GetPropInt(self, "m_nButtons");
     if (!(buttons & Constants.FButtons.IN_RELOAD)) {
