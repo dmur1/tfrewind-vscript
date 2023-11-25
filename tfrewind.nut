@@ -71,6 +71,22 @@ function Rewind() {
     r_numValidFramesBuffered -= 1;
 }
 
+function ReadyToRewindFX() {
+    ClientPrint(self, 3, "READY TO REWIND");
+
+    EmitSoundEx({
+        sound_name = "player/recharged.wav",
+        entity = self,
+        filter_type = Constants.EScriptRecipientFilter.RECIPIENT_FILTER_SINGLE_PLAYER
+    });
+
+    EmitSoundEx({
+        sound_name = "ui/cyoa_map_open.wav",
+        entity = self,
+        filter_type = Constants.EScriptRecipientFilter.RECIPIENT_FILTER_SINGLE_PLAYER
+    });
+}
+
 function CaptureState() {
     local bufferIndex = r_bufferIndex;
 
@@ -84,10 +100,10 @@ function CaptureState() {
 
     if (r_numValidFramesBuffered < NUM_FRAMES_TO_BUFFER) {
         r_numValidFramesBuffered += 1;
-    }
 
-    if (r_numValidFramesBuffered == NUM_FRAMES_TO_BUFFER) {
-        // ready to rewind!
+        if (r_numValidFramesBuffered == NUM_FRAMES_TO_BUFFER) {
+            ReadyToRewindFX();
+        }
     }
 }
 
