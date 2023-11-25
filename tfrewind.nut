@@ -68,6 +68,8 @@ function StartRewindFX() {
     PlaySound2D(SOUND_UI_START_REWIND);
     PlaySound3D(SOUND_WORLD_START_REWIND_1);
     PlaySound3D(SOUND_WORLD_START_REWIND_2);
+
+    self.AddCondEx(Constants.ETFCond.TF_COND_TELEPORTED, 1, null);
 }
 
 function ShouldRewind() {
@@ -114,6 +116,8 @@ function Rewind() {
     r_bufferIndex = bufferIndex;
 
     r_numValidFramesBuffered -= 1;
+
+    self.SetCondDuration(Constants.ETFCond.TF_COND_TELEPORTED, 1);
 }
 
 function ReadyToRewindFX() {
