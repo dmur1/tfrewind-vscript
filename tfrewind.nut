@@ -108,8 +108,6 @@ function OnGameEvent_player_spawn(params) {
     if (!player)
         return;
 
-    printf("player spawned!");
-
     player.ValidateScriptScope();
 
     player.GetScriptScope().r_isRewinding <- 0
