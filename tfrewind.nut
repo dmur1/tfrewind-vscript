@@ -72,6 +72,13 @@ function StartRewindFX() {
     self.AddCondEx(Constants.ETFCond.TF_COND_TELEPORTED, 1, null);
 }
 
+function UpdateHealth() {
+    local health = self.GetHealth();
+    local healthDelta = health - r_currentHealth;
+    r_currentHealth = health;
+    r_healthDelta = healthDelta;
+}
+
 function ShouldRewind() {
     local buttons = NetProps.GetPropInt(self, "m_nButtons");
     if (!(buttons & Constants.FButtons.IN_RELOAD)) {
@@ -113,6 +120,11 @@ function Rewind() {
         REWIND_ANGLE, newAngle,
         REWIND_VELOCITY, newVelocity);
 
+    local oldHealthChange = r_healthChange[bufferIndex];
+    if (oldHealthChange < 0) {
+        self.SetHealth(self.GetHealth() + -oldHealthChange);
+    }
+
     r_bufferIndex = bufferIndex;
 
     r_numValidFramesBuffered -= 1;
@@ -136,6 +148,8 @@ function CaptureState() {
 
     r_velocity[bufferIndex] = self.GetAbsVelocity();
 
+    r_healthChange[bufferIndex] = r_healthDelta;
+
     r_bufferIndex = (bufferIndex + 1) % NUM_FRAMES_TO_BUFFER;
 
     if (r_numValidFramesBuffered < NUM_FRAMES_TO_BUFFER) {
@@ -148,6 +162,8 @@ function CaptureState() {
 }
 
 function PlayerThink() {
+    UpdateHealth();
+
     ShouldRewind();
 
     if (r_isRewinding == 1) {
@@ -185,6 +201,15 @@ function OnGameEvent_player_spawn(params) {
     player.GetScriptScope().r_velocity <- [];
     for (local i = 0; i < NUM_FRAMES_TO_BUFFER; i++) {
         player.GetScriptScope().r_velocity.append(Vector(0, 0, 0));
+    }
+
+    player.GetScriptScope().r_currentHealth <- player.GetHealth();
+
+    player.GetScriptScope().r_healthDelta <- 0;
+
+    player.GetScriptScope().r_healthChange <- [];
+    for (local i = 0; i < NUM_FRAMES_TO_BUFFER; i++) {
+        player.GetScriptScope().r_healthChange.append(0);
     }
 
     AddThinkToEnt(player, "PlayerThink");
