@@ -121,6 +121,9 @@ function Rewind() {
     local newAngle = r_angle[bufferIndex];
 
     local newVelocity = r_velocity[bufferIndex];
+    newVelocity.x *= -1.0;
+    newVelocity.y *= -1.0;
+    newVelocity.z *= -1.0;
 
     self.Teleport(
         REWIND_POSITION, newOrigin,
