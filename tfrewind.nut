@@ -196,39 +196,41 @@ function OnGameEvent_player_spawn(params) {
 
     player.ValidateScriptScope();
 
-    player.GetScriptScope().r_isRewinding <- 0;
+    local playerScriptScope = player.GetScriptScope();
 
-    player.GetScriptScope().r_numValidFramesBuffered <- 0
+    playerScriptScope.r_isRewinding <- 0;
 
-    player.GetScriptScope().r_bufferIndex <- 0;
+    playerScriptScope.r_numValidFramesBuffered <- 0
 
-    player.GetScriptScope().r_position <- [];
+    playerScriptScope.r_bufferIndex <- 0;
+
+    playerScriptScope.r_position <- [];
     for (local i = 0; i < NUM_FRAMES_TO_BUFFER; i++) {
-        player.GetScriptScope().r_position.append(Vector(0, 0, 0));
+        playerScriptScope.r_position.append(Vector(0, 0, 0));
     }
 
-    player.GetScriptScope().r_angle <- [];
+    playerScriptScope.r_angle <- [];
     for (local i = 0; i < NUM_FRAMES_TO_BUFFER; i++) {
-        player.GetScriptScope().r_angle.append(QAngle(0, 0, 0));
+        playerScriptScope.r_angle.append(QAngle(0, 0, 0));
     }
 
-    player.GetScriptScope().r_velocity <- [];
+    playerScriptScope.r_velocity <- [];
     for (local i = 0; i < NUM_FRAMES_TO_BUFFER; i++) {
-        player.GetScriptScope().r_velocity.append(Vector(0, 0, 0));
+        playerScriptScope.r_velocity.append(Vector(0, 0, 0));
     }
 
-    player.GetScriptScope().r_currentHealth <- player.GetHealth();
+    playerScriptScope.r_currentHealth <- player.GetHealth();
 
-    player.GetScriptScope().r_healthDelta <- 0;
+    playerScriptScope.r_healthDelta <- 0;
 
-    player.GetScriptScope().r_healthChange <- [];
+    playerScriptScope.r_healthChange <- [];
     for (local i = 0; i < NUM_FRAMES_TO_BUFFER; i++) {
-        player.GetScriptScope().r_healthChange.append(0);
+        playerScriptScope.r_healthChange.append(0);
     }
 
-    player.GetScriptScope().r_conditions <- [];
+    playerScriptScope.r_conditions <- [];
     for (local i = 0; i < NUM_FRAMES_TO_BUFFER; i++) {
-        player.GetScriptScope().r_conditions.append(0);
+        playerScriptScope.r_conditions.append(0);
     }
 
     AddThinkToEnt(player, "PlayerThink");
