@@ -32,6 +32,7 @@ const REWIND_VELOCITY = true;
 const REWIND_CONDITION_ON_FIRE = 1;          // 1 << 0
 const REWIND_CONDITION_SOAKED_IN_JARATE = 2; // 1 << 1
 const REWIND_COND_COVERED_IN_MILK = 4;       // 1 << 2
+const REWIND_COND_UBERED = 8;                // 1 << 3
 
 const SOUND_UI_READY_TO_REWIND_1 = "player/recharged.wav";
 const SOUND_UI_READY_TO_REWIND_2 = "ui/cyoa_map_open.wav";
@@ -147,6 +148,12 @@ function Rewind() {
         }
     }
 
+    if (self.GetCondDuration(Constants.ETFCond.TF_COND_INVULNERABLE) == 0) {
+        if (r_conditions[bufferIndex] & REWIND_COND_UBERED) {
+            self.AddCondEx(Constants.ETFCond.TF_COND_INVULNERABLE, 1, null);
+        }
+    }
+
     r_bufferIndex = bufferIndex;
 
     r_numValidFramesBuffered -= 1;
@@ -184,6 +191,10 @@ function CaptureState() {
 
     if (self.GetCondDuration(Constants.ETFCond.TF_COND_MAD_MILK) != 0) {
         r_conditions[bufferIndex] = r_conditions[bufferIndex] | REWIND_COND_COVERED_IN_MILK;
+    }
+
+    if (self.GetCondDuration(Constants.ETFCond.TF_COND_INVULNERABLE) != 0) {
+        r_conditions[bufferIndex] = r_conditions[bufferIndex] | REWIND_COND_UBERED;
     }
 
     r_bufferIndex = (bufferIndex + 1) % NUM_FRAMES_TO_BUFFER;
