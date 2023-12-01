@@ -166,7 +166,7 @@ function OnGameEvent_player_spawn(params) {
 
     player.ValidateScriptScope();
 
-    player.GetScriptScope().r_isRewinding <- 0
+    player.GetScriptScope().r_isRewinding <- 0;
 
     player.GetScriptScope().r_numValidFramesBuffered <- 0
 
@@ -182,7 +182,7 @@ function OnGameEvent_player_spawn(params) {
         player.GetScriptScope().r_angle.append(QAngle(0, 0, 0));
     }
 
-    player.GetScriptScope().r_velocity <- []
+    player.GetScriptScope().r_velocity <- [];
     for (local i = 0; i < NUM_FRAMES_TO_BUFFER; i++) {
         player.GetScriptScope().r_velocity.append(Vector(0, 0, 0));
     }
