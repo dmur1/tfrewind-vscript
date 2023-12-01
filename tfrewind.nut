@@ -29,6 +29,8 @@ const REWIND_POSITION = true;
 const REWIND_ANGLE = false;
 const REWIND_VELOCITY = true;
 
+const REWIND_CONDITION_ON_FIRE = 1; // 1 << 0
+
 const SOUND_UI_READY_TO_REWIND_1 = "player/recharged.wav";
 const SOUND_UI_READY_TO_REWIND_2 = "ui/cyoa_map_open.wav";
 const SOUND_UI_START_REWIND = "ui/buttonclick.wav";
@@ -125,6 +127,12 @@ function Rewind() {
         self.SetHealth(self.GetHealth() + -oldHealthChange);
     }
 
+    if (self.GetCondDuration(Constants.ETFCond.TF_COND_BURNING) != 0) {
+        if ((r_conditions[bufferIndex] & REWIND_CONDITION_ON_FIRE) == 0) {
+            self.SetCondDuration(Constants.ETFCond.TF_COND_BURNING, 0);
+        }
+    }
+
     r_bufferIndex = bufferIndex;
 
     r_numValidFramesBuffered -= 1;
@@ -149,6 +157,12 @@ function CaptureState() {
     r_velocity[bufferIndex] = self.GetAbsVelocity();
 
     r_healthChange[bufferIndex] = r_healthDelta;
+
+    r_conditions[bufferIndex] = 0;
+
+    if (self.GetCondDuration(Constants.ETFCond.TF_COND_BURNING) != 0) {
+        r_conditions[bufferIndex] = r_conditions[bufferIndex] | REWIND_CONDITION_ON_FIRE;
+    }
 
     r_bufferIndex = (bufferIndex + 1) % NUM_FRAMES_TO_BUFFER;
 
@@ -210,6 +224,11 @@ function OnGameEvent_player_spawn(params) {
     player.GetScriptScope().r_healthChange <- [];
     for (local i = 0; i < NUM_FRAMES_TO_BUFFER; i++) {
         player.GetScriptScope().r_healthChange.append(0);
+    }
+
+    player.GetScriptScope().r_conditions <- [];
+    for (local i = 0; i < NUM_FRAMES_TO_BUFFER; i++) {
+        player.GetScriptScope().r_conditions.append(0);
     }
 
     AddThinkToEnt(player, "PlayerThink");
