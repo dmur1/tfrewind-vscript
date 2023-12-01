@@ -34,6 +34,7 @@ const REWIND_CONDITION_SOAKED_IN_JARATE = 2; // 1 << 1
 const REWIND_COND_COVERED_IN_MILK = 4;       // 1 << 2
 const REWIND_COND_UBERED = 8;                // 1 << 3
 const REWIND_COND_KRITZED = 16;              // 1 << 4
+const REWIND_COND_DUCKING = 131072;          // 1 << 17
 
 const SOUND_UI_READY_TO_REWIND_1 = "player/recharged.wav";
 const SOUND_UI_READY_TO_REWIND_2 = "ui/cyoa_map_open.wav";
@@ -162,6 +163,16 @@ function Rewind() {
         }
     }
 
+    if (r_conditions[bufferIndex] & REWIND_COND_DUCKING) {
+        self.AddFlag(Constants.FPlayer.FL_DUCKING);
+        NetProps.SetPropBool(self, "m_bDucked", true);
+        NetProps.SetPropBool(self, "m_bDucking", true);
+    } else {
+        self.RemoveFlag(Constants.FPlayer.FL_DUCKING);
+        NetProps.SetPropBool(self, "m_bDucked", false);
+        NetProps.SetPropBool(self, "m_bDucking", false);
+    }
+
     r_bufferIndex = bufferIndex;
 
     r_numValidFramesBuffered -= 1;
@@ -208,6 +219,10 @@ function CaptureState() {
     // TODO(smiley): test this as it doesn't seem to work
     if (self.GetCondDuration(Constants.ETFCond.TF_COND_CRITBOOSTED) != 0) {
         r_conditions[bufferIndex] = r_conditions[bufferIndex] | REWIND_COND_KRITZED;
+    }
+
+    if (self.GetFlags() & Constants.FPlayer.FL_DUCKING) {
+        r_conditions[bufferIndex] = r_conditions[bufferIndex] | REWIND_COND_DUCKING;
     }
 
     r_bufferIndex = (bufferIndex + 1) % NUM_FRAMES_TO_BUFFER;
