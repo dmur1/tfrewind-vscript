@@ -86,7 +86,7 @@ function OnGameEvent_rocket_jump(params) {
     if (!player)
         return;
 
-    player.GetScriptScope().r_isRocketJumping = 1;
+    player.GetScriptScope().r_currentlyRocketJumping = 1;
     player.GetScriptScope().r_technicallyRocketJumping = 1;
 }
 
@@ -197,9 +197,9 @@ function Rewind() {
 
     // TODO(smiley): do this only for solly
     if (r_conditions[bufferIndex] & REWIND_COND_ROCKET_JUMPING) {
-        r_isRocketJumping = 1;
+        r_currentlyRocketJumping = 1;
     } else {
-        r_isRocketJumping = 0;
+        r_currentlyRocketJumping = 0;
     }
 
     r_bufferIndex = bufferIndex;
@@ -254,7 +254,7 @@ function CaptureState() {
         r_conditions[bufferIndex] = r_conditions[bufferIndex] | REWIND_COND_DUCKING;
     }
 
-    if (r_isRocketJumping) {
+    if (r_currentlyRocketJumping) {
         r_conditions[bufferIndex] = r_conditions[bufferIndex] | REWIND_COND_ROCKET_JUMPING;
     }
 
@@ -280,9 +280,9 @@ function PlayerThink() {
         CaptureState();
     }
 
-    if (r_isRocketJumping) {
+    if (r_currentlyRocketJumping) {
         if (self.GetFlags() & Constants.FPlayer.FL_ONGROUND) {
-            r_isRocketJumping = 0;
+            r_currentlyRocketJumping = 0;
         }
     }
 
@@ -302,7 +302,7 @@ function OnGameEvent_player_spawn(params) {
 
     playerScriptScope.r_numValidFramesBuffered <- 0
 
-    playerScriptScope.r_isRocketJumping <- 0;
+    playerScriptScope.r_currentlyRocketJumping <- 0;
     playerScriptScope.r_technicallyRocketJumping <- 0;
 
     playerScriptScope.r_bufferIndex <- 0;
