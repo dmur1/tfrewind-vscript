@@ -197,7 +197,6 @@ function Rewind() {
 
     // TODO(smiley): do this only for solly
     if (r_conditions[bufferIndex] & REWIND_COND_ROCKET_JUMPING) {
-        ClientPrint(self, 3, "do we go here?\n");
         r_isRocketJumping = 1;
     } else {
         r_isRocketJumping = 0;
