@@ -56,6 +56,7 @@ function PlaySound2D(sound) {
     });
 }
 
+// TODO(dan.murray): 3D sound is bugged and stacks up
 function PlaySound3D(sound) {
     for (local i = 1; i <= MaxPlayers; i++) {
        local player = PlayerInstanceFromIndex(i);
