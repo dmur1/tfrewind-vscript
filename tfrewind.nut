@@ -34,6 +34,7 @@ const REWIND_CONDITION_SOAKED_IN_JARATE = 2; // 1 << 1
 const REWIND_COND_COVERED_IN_MILK = 4;       // 1 << 2
 const REWIND_COND_UBERED = 8;                // 1 << 3
 const REWIND_COND_KRITZED = 16;              // 1 << 4
+const REWIND_COND_QUICK_FIXED = 32;          // 1 << 5
 const REWIND_COND_ROCKET_JUMPING = 65536;    // 1 << 16
 const REWIND_COND_DUCKING = 131072;          // 1 << 17
 
@@ -185,6 +186,12 @@ function Rewind() {
         }
     }
 
+    if (self.GetCondDuration(Constants.ETFCond.TF_COND_MEGAHEAL) == 0) {
+        if (r_conditions[bufferIndex] & REWIND_COND_QUICK_FIXED) {
+            self.AddCondEx(Constants.ETFCond.TF_COND_MEGAHEAL, 1, null);
+        }
+    }
+
     if (r_conditions[bufferIndex] & REWIND_COND_DUCKING) {
         self.AddFlag(Constants.FPlayer.FL_DUCKING);
         NetProps.SetPropBool(self, "m_bDucked", true);
@@ -248,6 +255,10 @@ function CaptureState() {
     // TODO(smiley): test this as it doesn't seem to work
     if (self.GetCondDuration(Constants.ETFCond.TF_COND_CRITBOOSTED) != 0) {
         r_conditions[bufferIndex] = r_conditions[bufferIndex] | REWIND_COND_KRITZED;
+    }
+
+    if (self.GetCondDuration(Constants.ETFCond.TF_COND_MEGAHEAL) != 0) {
+        r_conditions[bufferIndex] = r_conditions[bufferIndex] | REWIND_COND_QUICK_FIXED;
     }
 
     if (self.GetFlags() & Constants.FPlayer.FL_DUCKING) {
