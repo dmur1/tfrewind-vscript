@@ -34,6 +34,7 @@ const REWIND_CONDITION_SOAKED_IN_JARATE = 2; // 1 << 1
 const REWIND_COND_COVERED_IN_MILK = 4;       // 1 << 2
 const REWIND_COND_UBERED = 8;                // 1 << 3
 const REWIND_COND_KRITZED = 16;              // 1 << 4
+const REWIND_COND_ROCKET_JUMPING = 65536;    // 1 << 16
 const REWIND_COND_DUCKING = 131072;          // 1 << 17
 
 const SOUND_UI_READY_TO_REWIND_1 = "player/recharged.wav";
@@ -78,6 +79,23 @@ function StartRewindFX() {
     PlaySound3D(SOUND_WORLD_START_REWIND_2);
 
     self.AddCondEx(Constants.ETFCond.TF_COND_TELEPORTED, 1, null);
+}
+
+function OnGameEvent_rocket_jump(params) {
+    local player = GetPlayerFromUserID(params.userid);
+    if (!player)
+        return;
+
+    player.GetScriptScope().r_isRocketJumping = 1;
+    player.GetScriptScope().r_technicallyRocketJumping = 1;
+}
+
+function OnGameEvent_rocket_jump_landed(params) {
+    local player = GetPlayerFromUserID(params.userid);
+    if (!player)
+        return;
+
+    player.GetScriptScope().r_technicallyRocketJumping = 0;
 }
 
 function UpdateHealth() {
@@ -177,6 +195,14 @@ function Rewind() {
         NetProps.SetPropBool(self, "m_bDucking", false);
     }
 
+    // TODO(smiley): do this only for solly
+    if (r_conditions[bufferIndex] & REWIND_COND_ROCKET_JUMPING) {
+        ClientPrint(self, 3, "do we go here?\n");
+        r_isRocketJumping = 1;
+    } else {
+        r_isRocketJumping = 0;
+    }
+
     r_bufferIndex = bufferIndex;
 
     r_numValidFramesBuffered -= 1;
@@ -229,6 +255,10 @@ function CaptureState() {
         r_conditions[bufferIndex] = r_conditions[bufferIndex] | REWIND_COND_DUCKING;
     }
 
+    if (r_isRocketJumping) {
+        r_conditions[bufferIndex] = r_conditions[bufferIndex] | REWIND_COND_ROCKET_JUMPING;
+    }
+
     r_bufferIndex = (bufferIndex + 1) % NUM_FRAMES_TO_BUFFER;
 
     if (r_numValidFramesBuffered < NUM_FRAMES_TO_BUFFER) {
@@ -251,6 +281,12 @@ function PlayerThink() {
         CaptureState();
     }
 
+    if (r_isRocketJumping) {
+        if (self.GetFlags() & Constants.FPlayer.FL_ONGROUND) {
+            r_isRocketJumping = 0;
+        }
+    }
+
     return -1;
 }
 
@@ -266,6 +302,9 @@ function OnGameEvent_player_spawn(params) {
     playerScriptScope.r_isRewinding <- 0;
 
     playerScriptScope.r_numValidFramesBuffered <- 0
+
+    playerScriptScope.r_isRocketJumping <- 0;
+    playerScriptScope.r_technicallyRocketJumping <- 0;
 
     playerScriptScope.r_bufferIndex <- 0;
 
